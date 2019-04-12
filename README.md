@@ -29,15 +29,10 @@ git clone https://github.com/vcheckzen/LanzouCloudAPI.git
 cd LanzouCloudAPI
 ```
 
-### Install Requirements
+### Install Requirements and Run
 
 ```bash
 pip install -r requirements.txt
-```
-
-### Run and Test
-
-```bash
 python app.py
 ```
 
