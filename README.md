@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Redirect to download server when given lanzoucloud share link, implemented with Flask, python. This implementation uses both User-Agent of Android and PC ensuring to get direct link successfully.
+Redirect to download server when given lanzoucloud share link, implemented with Flask, python. This implementation uses both User-Agent of Android and PC, ensuring to get direct link successfully.
 
 ## Request Format
 
