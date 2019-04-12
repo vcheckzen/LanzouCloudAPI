@@ -9,7 +9,7 @@ Redirect to download server when given lanzoucloud share link, implemented with 
 If the share link has a password, then
 
 ```html
-https://www.example.com?url=https://www.lanzous.com/i3clqna&type=down&pwd=b2ur
+https://www.example.com?url=https://www.lanzous.com/i3clqna&pwd=b2ur
 ```
 
 Or
