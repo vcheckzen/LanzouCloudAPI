@@ -53,24 +53,25 @@ def get_para_simulate_phone(fid, pwd, host, headers):
 
 def get_direct_link(fid, pwd, type):
     host = 'https://www.lanzous.com'
-    ua = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36', 'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Mobile Safari/537.36']
+    ua = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36', 
+    'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Mobile Safari/537.36'
+    ]
     headers = {
         'User-Agent': ua[type],
         'Referer': host
     }
+
     if type == 0:
         data = get_para_simulate_pc(fid, pwd, host, headers)
-        response = requests.post(url=host + '/ajaxm.php',headers=headers, data=data)
-        result = json.loads(response.text)
-        link = result['dom'] + '/file/' + result['url']
+    elif pwd:
+        data = get_para_simulate_phone(fid, pwd, host, headers)
     else:
-        if pwd:
-            data = get_para_simulate_phone(fid, pwd, host, headers)
-            response = requests.post(url=host + '/ajaxm.php',headers=headers, data=data)
-            result = json.loads(response.text)
-            link = result['dom'] + '/file/' + result['url']
-        else:
-            link = get_link_simulate_phone(fid, host, headers)
+        return get_link_simulate_phone(fid, host, headers)
+
+    response = requests.post(url=host + '/ajaxm.php',headers=headers, data=data)
+    result = json.loads(response.text)
+    link = result['dom'] + '/file/' + result['url']
 
     return link
 
