@@ -83,12 +83,11 @@ def favicon():
 
 @app.route('/')
 def redirect_to_download_server():
-    if not re.match('.+/\?url=https:%2F%2Fwww\.lanzous\.com%2F[0-9a-z]{7,}.*', request.url):
-        return jsonify({'errno': '1', 'msg': 'not found'})
-
     url = request.args.get('url')
-    fid = url.split('/')[3]
     pwd = request.args.get('pwd')
+    fid = url.split('/')[3]
+    if not re.match('^https://www\.lanzous\.com/[0-9a-z]{7,}$', url):
+        return jsonify({'errno': '1', 'msg': 'not found'})
 
     link = get_direct_link(fid, pwd, 1)
     if link.find('baidupan.com') < 0:
