@@ -2,11 +2,11 @@
 
 ## Introduction
 
-Redirect to download server when given lanzoucloud share link, implemented with Flask, python. This implementation uses both User-Agent of Android and PC, ensuring to get direct link successfully.
+Redirect to download server when given lanzoucloud sharing link, implemented with Flask, python. This implementation uses both User-Agent of Android and PC, ensuring to get download link successfully.
 
 ## Request Format
 
-If the share link has a password, then
+If the sharing link has a password, then
 
 ```html
 https://api-logi-py.us-south.cf.appdomain.cloud?url=https://www.lanzous.com/i3clqna&pwd=b2ur
