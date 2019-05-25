@@ -99,7 +99,7 @@ def redirect_to_download_server():
 
     url = request.args.get('url')
     pwd = request.args.get('pwd')
-    type = requests.args.get('type')
+    type = request.args.get('type')
 
     fid = url.split('/')[3]
     link = get_direct_link(fid, pwd, 1)
