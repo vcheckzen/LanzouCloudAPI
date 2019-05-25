@@ -12,42 +12,47 @@ port = int(os.getenv('PORT', '3000'))
 
 
 def get_para_simulate_pc(fid, pwd, host, headers):
-    response = requests.get(url=host + '/' + fid, headers=headers)
-    frame = str(re.findall(r"src=\"(.*)\" frameborder", response.text)[0])
-
-    response = requests.get(url=host + frame, headers=headers)
-    file_id = str(re.findall(r"\'(.{7})\'", response.text)[0])
-    t = str(re.findall(r"\'(.{10})\'", response.text)[0])
-    k = str(re.findall(r"\'(.{32})\'", response.text)[0])
-
-    return {
-        'action': 'down_process',
-        'file_id': file_id,
-        't': t,
-        'k': k,
-        'p': pwd,
-        'c': ''
-    }
+    try:
+        response = requests.get(url=host + '/' + fid, headers=headers)
+        frame = str(re.findall(r"src=\"(.*)\" frameborder", response.text)[0])
+        response = requests.get(url=host + frame, headers=headers)
+        file_id = str(re.findall(r"\'(.{7})\'", response.text)[0])
+        t = str(re.findall(r"\'(.{10})\'", response.text)[0])
+        k = str(re.findall(r"\'(.{32})\'", response.text)[0])
+        return {
+            'action': 'down_process',
+            'file_id': file_id,
+            't': t,
+            'k': k,
+            'p': pwd,
+            'c': ''
+        }
+    except:
+        return
 
 
 def get_link_simulate_phone(fid, host, headers):
-    response = requests.get(url=host + '/tp/' + fid, headers=headers)
-    urlp = str(re.findall(r"urlp = \'(.*)\'", response.text)[0])
-    para = str(re.findall(r"urlp \+ \'(.*)\'", response.text)[0])
-
-    return urlp + para
+    try:
+        response = requests.get(url=host + '/tp/' + fid, headers=headers)
+        urlp = str(re.findall(r"urlp = \'(.*)\'", response.text)[0])
+        para = str(re.findall(r"urlp \+ \'(.*)\'", response.text)[0])
+        return urlp + para
+    except:
+        return
 
 
 def get_para_simulate_phone(fid, pwd, host, headers):
-    response = requests.get(url=host + '/tp/' + fid, headers=headers)
-    para = str(re.findall(r"data : \'(.*)\'\+pwd", response.text)[0])
-    data = {}
-    for item in para.split('&'):
-        tmp = item.split('=')
-        data[tmp[0]] = tmp[1]
-    data['p'] = pwd
-
-    return data
+    try:
+        response = requests.get(url=host + '/tp/' + fid, headers=headers)
+        para = str(re.findall(r"data : \'(.*)\'\+pwd", response.text)[0])
+        data = {}
+        for item in para.split('&'):
+            tmp = item.split('=')
+            data[tmp[0]] = tmp[1]
+        data['p'] = pwd
+        return data
+    except:
+        return
 
 
 def get_direct_link(fid, pwd, type):
@@ -66,13 +71,19 @@ def get_direct_link(fid, pwd, type):
     elif pwd:
         data = get_para_simulate_phone(fid, pwd, host, headers)
     else:
-        return get_link_simulate_phone(fid, host, headers)
+        fakeurl = get_link_simulate_phone(fid, host, headers)
 
-    response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
-    result = json.loads(response.text)
-    link = result['dom'] + '/file/' + result['url']
+    try:
+        if pwd:
+            response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
+            result = json.loads(response.text)
+            fakeurl = result['dom'] + '/file/' + result['url']
 
-    return link
+        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
+        response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
+        return response.headers['Location']
+    except:
+        return ''
 
 
 @app.route('/favicon.ico')
@@ -91,10 +102,13 @@ def redirect_to_download_server():
     fid = url.split('/')[3]
 
     link = get_direct_link(fid, pwd, 1)
-    if link.find('baidupan.com') < 0:
+    if link.find('development') < 0:
         link = get_direct_link(fid, pwd, 0)
 
-    return redirect(link)
+    if link.find('development') >= 0:
+        return link
+
+    abort(404)
 
 
 @app.errorhandler(404)
