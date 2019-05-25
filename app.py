@@ -4,10 +4,13 @@
 import os
 import re
 import json
+import urlparse
 import requests
+from flask_cors import CORS
 from flask import Flask, request, redirect, send_from_directory, jsonify, abort
 
 app = Flask(__name__)
+CORS(app)
 port = int(os.getenv('PORT', '3000'))
 
 
@@ -110,7 +113,8 @@ def redirect_to_download_server():
         if type == 'down':
             return redirect(link)
         else:
-            return jsonify({'code': '200', 'msg': 'success', 'data': link})
+            filename = dict(urlparse.parse_qsl(urlparse.urlsplit(link).query))['q']
+            return jsonify({'code': '200', 'msg': 'success', 'data': {'filename': filename, 'downUrl': link}})
 
     abort(404)
 
@@ -118,7 +122,7 @@ def redirect_to_download_server():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def handle_invalid_usage(error):
-    return jsonify({'code': '404', 'msg': 'not found'})
+    return jsonify({'code': '404', 'data': [], 'msg': 'not found'})
 
 
 if __name__ == '__main__':
