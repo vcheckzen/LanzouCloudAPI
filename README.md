@@ -13,7 +13,7 @@ Method: GET
 | type   |        |          | return download info        |
 | type   | down   |          | redirect to download server |
 
-## Response Foramt
+## Response Format
 
 ### Headers
 
