@@ -106,7 +106,7 @@ def redirect_to_download_server():
         link = get_direct_link(fid, pwd, 0)
 
     if link.find('development') >= 0:
-        return link
+        return redirect(link)
 
     abort(404)
 
