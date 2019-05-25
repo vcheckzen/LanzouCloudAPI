@@ -64,7 +64,7 @@ Host: localhost:3000
 }
 ```
 
-## Get Started
+## How to Deploy
 
 ### Download the Code
 
