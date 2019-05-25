@@ -99,14 +99,18 @@ def redirect_to_download_server():
 
     url = request.args.get('url')
     pwd = request.args.get('pwd')
-    fid = url.split('/')[3]
+    type = requests.args.get('type')
 
+    fid = url.split('/')[3]
     link = get_direct_link(fid, pwd, 1)
     if link.find('development') < 0:
         link = get_direct_link(fid, pwd, 0)
 
     if link.find('development') >= 0:
-        return redirect(link)
+        if type == 'down':
+            return redirect(link)
+        else:
+            return jsonify({'code': '200', 'msg': 'success', 'data': link})
 
     abort(404)
 
@@ -114,7 +118,7 @@ def redirect_to_download_server():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def handle_invalid_usage(error):
-    return jsonify({'errno': '1', 'msg': 'not found'})
+    return jsonify({'code': '404', 'msg': 'not found'})
 
 
 if __name__ == '__main__':
