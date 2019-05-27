@@ -14,10 +14,13 @@ CORS(app)
 port = int(os.getenv('PORT', '3000'))
 
 
-def get_filename(fid, host, headers):
+def get_filename(fid, pwd, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
-        filename = str(re.findall(r"filename = '(.+)'", response.text)[0])
+        if pwd:
+            filename = str(re.findall(r"filename = '(.+)'", response.text)[0])
+        else:
+            filename = str(re.findall(r"<title>(.+) - 蓝奏云", response.text)[0])
         return filename
     except:
         return ''
@@ -94,7 +97,7 @@ def get_download_info(fid, pwd, type):
         headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
         response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
         headers['User-Agent'] = ua[0]
-        filename = get_filename(fid, host, headers)
+        filename = get_filename(fid, pwd, host, headers)
         return {'filename': filename, 'downUrl': response.headers['Location']}
     except:
         return ''
