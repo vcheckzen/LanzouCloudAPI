@@ -26,7 +26,7 @@ Method: GET
 | Params         | Option | Remark       | Msg       |
 | -------------- | ------ | ------------ | --------- |
 | code           | 200    | status code  | success   |
-| code           | 400    | status code  | not found |
+| code           | 404    | status code  | not found |
 | data[filename] |        | filename     |           |
 | data[filesize] |        | filesize     |           |
 | data[downUrl]  |        | download url |           |
