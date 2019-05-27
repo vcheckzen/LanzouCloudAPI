@@ -14,16 +14,14 @@ CORS(app)
 port = int(os.getenv('PORT', '3000'))
 
 
-def get_filename(fid, pwd, host, headers):
+def get_fileinfo(fid, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
-        if pwd:
-            filename = str(re.findall(r"filename = '(.+)'", response.text)[0])
-        else:
-            filename = str(re.findall(r"<title>(.+) - 蓝奏云", response.text)[0])
-        return filename
+        filename = str(re.findall(r"<title>(.+) -", response.text)[0])
+        filesize = str(re.findall(r"<span class=\"mtt\">\( (.+) \)</span>", response.text)[0])
+        return {'filename': filename, 'filesize': filesize}
     except:
-        return ''
+        return None
 
 
 def get_para_simulate_pc(fid, pwd, host, headers):
@@ -96,11 +94,12 @@ def get_download_info(fid, pwd, type):
 
         headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
         response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
-        headers['User-Agent'] = ua[0]
-        filename = get_filename(fid, pwd, host, headers)
-        return {'filename': filename, 'downUrl': response.headers['Location']}
+        headers['User-Agent'] = ua[1]
+        fileinfo = get_fileinfo(fid, host, headers)
+        return {'filename': fileinfo['filename'],
+                'filesize': fileinfo['filesize'], 'downUrl': response.headers['Location']}
     except:
-        return ''
+        return {'filename': '', 'filesize': '', 'downUrl': ''}
 
 
 @app.route('/favicon.ico')
@@ -127,8 +126,8 @@ def redirect_to_download_server():
         if type == 'down':
             return redirect(download_info['downUrl'])
         else:
-            return jsonify({'code': '200', 'msg': 'success',
-                            'data': {'filename': download_info['filename'], 'downUrl': download_info['downUrl']}})
+            return jsonify({'code': 200, 'msg': 'success',
+                            'data': download_info})
 
     abort(404)
 
@@ -136,7 +135,7 @@ def redirect_to_download_server():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def handle_invalid_usage(error):
-    return jsonify({'code': '404', 'msg': 'not found'})
+    return jsonify({'code': 404, 'msg': 'not found'})
 
 
 if __name__ == '__main__':
