@@ -31,18 +31,18 @@ Method: GET
 | data[filesize] |        | filesize     |           |
 | data[downUrl]  |        | download url |           |
 
-### Example:
+## Example:
 
-#### Request:
+### Request:
 
 ```http
 GET /?url=https://www.lanzous.com/i44mvof&pwd=btrs HTTP/1.1
 Host: localhost:3000
 ```
 
-#### Response:
+### Response:
 
-##### Success
+#### Success
 
 ```json
 {
@@ -55,7 +55,7 @@ Host: localhost:3000
 }
 ```
 
-##### Failure
+#### Failure
 
 ```json
 {
