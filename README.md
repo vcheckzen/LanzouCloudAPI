@@ -54,12 +54,11 @@ Host: localhost:3000
 }
 ```
 
-##### Failed
+##### Failure
 
 ```json
 {
   "code": "404",
-  "data": [],
   "msg": "not found"
 }
 ```

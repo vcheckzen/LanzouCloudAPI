@@ -122,7 +122,7 @@ def redirect_to_download_server():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def handle_invalid_usage(error):
-    return jsonify({'code': '404', 'data': [], 'msg': 'not found'})
+    return jsonify({'code': '404', 'msg': 'not found'})
 
 
 if __name__ == '__main__':
