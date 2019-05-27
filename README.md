@@ -45,7 +45,7 @@ Host: localhost:3000
 
 ```json
 {
-  "code": "200",
+  "code": 200,
   "data": {
     "downUrl": "https://development56.baidupan.com/052601bb/2019/05/12/5b85e328ab5c326e411893721c56d811.apk?st=YEmyz-0ZzZckZIbKWauizA&e=1558805839&q=org.telegram.messenger_5.6.1-15900_minAPI16.apk&fi=8662345&up=",
     "filename": "org.telegram.messenger_5.6.1-15900_minAPI16.apk"
@@ -58,29 +58,7 @@ Host: localhost:3000
 
 ```json
 {
-  "code": "404",
+  "code": 404,
   "msg": "not found"
 }
 ```
-
-## How to Deploy
-
-### Download the Code
-
-Assuming you've installed git, then
-
-```bash
-git clone https://github.com/vcheckzen/LanzouCloudAPI.git
-cd LanzouCloudAPI
-```
-
-### Install Requirements and Run
-
-```bash
-pip install -r requirements.txt
-python app.py
-```
-
-## Reference
-
-- [LanzouAPI](https://github.com/MHanL/LanzouAPI)
