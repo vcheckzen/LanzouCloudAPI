@@ -96,7 +96,7 @@ def main_handler(event, context):
     data = {
         "isBase64Encoded": False,
         "statusCode": 200,
-        "headers": {'Content-Type': 'application/json; charset=utf-8'},
+        "headers": {'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*'},
         "body": json.dumps({'code': 404, 'msg': 'not found'})
     }
     try:
