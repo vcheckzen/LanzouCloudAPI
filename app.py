@@ -14,6 +14,15 @@ CORS(app)
 port = int(os.getenv('PORT', '3000'))
 
 
+def get_filename(fid, host, headers):
+    try:
+        response = requests.get(url=host + '/' + fid, headers=headers)
+        filename = str(re.findall(r"filename = '(.+)'", response.text)[0])
+        return filename
+    except:
+        return ''
+
+
 def get_para_simulate_pc(fid, pwd, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
@@ -58,7 +67,7 @@ def get_para_simulate_phone(fid, pwd, host, headers):
         return
 
 
-def get_direct_link(fid, pwd, type):
+def get_download_info(fid, pwd, type):
     host = 'https://www.lanzous.com'
     ua = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36',
@@ -84,7 +93,9 @@ def get_direct_link(fid, pwd, type):
 
         headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
         response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
-        return response.headers['Location']
+        headers['User-Agent'] = ua[0]
+        filename = get_filename(fid, host, headers)
+        return {'filename': filename, 'downUrl': response.headers['Location']}
     except:
         return ''
 
@@ -105,16 +116,16 @@ def redirect_to_download_server():
     type = request.args.get('type')
 
     fid = url.split('/')[3]
-    link = get_direct_link(fid, pwd, 1)
-    if link.find('development') < 0:
-        link = get_direct_link(fid, pwd, 0)
+    download_info = get_download_info(fid, pwd, 0)
+    if download_info['downUrl'].find('development') < 0:
+        download_info = get_download_info(fid, pwd, 1)
 
-    if link.find('development') >= 0:
+    if download_info['downUrl'].find('development') >= 0:
         if type == 'down':
-            return redirect(link)
+            return redirect(download_info['downUrl'])
         else:
-            filename = dict(urlparse.parse_qsl(urlparse.urlsplit(link).query))['q']
-            return jsonify({'code': '200', 'msg': 'success', 'data': {'filename': filename, 'downUrl': link}})
+            return jsonify({'code': '200', 'msg': 'success',
+                            'data': {'filename': download_info['filename'], 'downUrl': download_info['downUrl']}})
 
     abort(404)
 
