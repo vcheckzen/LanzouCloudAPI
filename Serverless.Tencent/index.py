@@ -32,7 +32,7 @@ def get_para_simulate_pc(fid, pwd, host, headers):
             'c': ''
         }
     except:
-        return
+        return None
 
 
 def get_link_simulate_phone(fid, host, headers):
@@ -42,7 +42,7 @@ def get_link_simulate_phone(fid, host, headers):
         para = str(re.findall(r"urlp \+ \'(.*)\'", response.text)[0])
         return urlp + para
     except:
-        return
+        return None
 
 
 def get_para_simulate_phone(fid, pwd, host, headers):
@@ -56,7 +56,7 @@ def get_para_simulate_phone(fid, pwd, host, headers):
         data['p'] = pwd
         return data
     except:
-        return
+        return None
 
 
 def get_download_info(fid, pwd, type):
@@ -78,7 +78,7 @@ def get_download_info(fid, pwd, type):
         fakeurl = get_link_simulate_phone(fid, host, headers)
 
     try:
-        if not fakeurl:
+        if 'fakeurl' not in dir() or not fakeurl:
             response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
             result = json.loads(response.text)
             fakeurl = result['dom'] + '/file/' + result['url']

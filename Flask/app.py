@@ -86,7 +86,7 @@ def get_download_info(fid, pwd, type):
         fakeurl = get_link_simulate_phone(fid, host, headers)
 
     try:
-        if not fakeurl:
+        if 'fakeurl' not in dir() or not fakeurl:
             response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
             result = json.loads(response.text)
             fakeurl = result['dom'] + '/file/' + result['url']
