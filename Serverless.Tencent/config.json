@@ -42,7 +42,6 @@
             "Content-Type": "text/html"
           },
           "body": "$content"
-          //the content of return msg
         }
       },
       "download_address": "https://github.com/vcheckzen/LanzouCloudAPI",
