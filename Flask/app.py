@@ -1,16 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os
 import re
 import json
-import urlparse
 import requests
-from flask_cors import CORS
-from flask import Flask, request, redirect, send_from_directory, jsonify, abort
+from flask import Flask, request, redirect, send_from_directory, jsonify, abort, make_response
 
 app = Flask(__name__)
-CORS(app)
 port = int(os.getenv('PORT', '3000'))
 
 
@@ -18,10 +15,10 @@ def get_fileinfo(fid, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
         filename = str(re.findall(r"<title>(.+) -", response.text)[0])
-        filesize = str(re.findall(r"<span class=\"mtt\">\( (.+) \)</span>", response.text)[0])
+        filesize = str(re.findall(r"<span class=\".+\">\( (.+) \)</span>", response.text)[0])
         return {'filename': filename, 'filesize': filesize}
     except:
-        return None
+        return {'filename': '', 'filesize': ''}
 
 
 def get_para_simulate_pc(fid, pwd, host, headers):
@@ -41,17 +38,17 @@ def get_para_simulate_pc(fid, pwd, host, headers):
             'c': ''
         }
     except:
-        return
+        return None
 
 
 def get_link_simulate_phone(fid, host, headers):
     try:
         response = requests.get(url=host + '/tp/' + fid, headers=headers)
-        urlp = str(re.findall(r"urlp = \'(.*)\'", response.text)[0])
-        para = str(re.findall(r"urlp \+ \'(.*)\'", response.text)[0])
+        urlp = str(re.findall(r"url.+ = \'(.+)\'", response.text)[0])
+        para = str(re.findall(r"url.+ \+ \"(.+)\"", response.text)[0])
         return urlp + para
     except:
-        return
+        return None
 
 
 def get_para_simulate_phone(fid, pwd, host, headers):
@@ -65,7 +62,7 @@ def get_para_simulate_phone(fid, pwd, host, headers):
         data['p'] = pwd
         return data
     except:
-        return
+        return None
 
 
 def get_download_info(fid, pwd, type):
@@ -87,17 +84,17 @@ def get_download_info(fid, pwd, type):
         fakeurl = get_link_simulate_phone(fid, host, headers)
 
     try:
-        if 'fakeurl' not in dir() or not fakeurl:
+        headers['User-Agent'] = ua[1]
+        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
+        if data:
             response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
             result = json.loads(response.text)
             fakeurl = result['dom'] + '/file/' + result['url']
-
-        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
-        response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
-        headers['User-Agent'] = ua[1]
+            response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
+        else:
+            response = requests.get(url=fakeurl, headers=headers, allow_redirects=False)
         fileinfo = get_fileinfo(fid, host, headers)
-        return {'filename': fileinfo['filename'],
-                'filesize': fileinfo['filesize'], 'downUrl': response.headers['Location']}
+        return {**fileinfo, 'downUrl': response.headers['Location']}
     except:
         return {'filename': '', 'filesize': '', 'downUrl': ''}
 
@@ -114,20 +111,28 @@ def redirect_to_download_server():
         abort(404)
 
     url = request.args.get('url')
-    pwd = request.args.get('pwd')
-    type = request.args.get('type')
+    try:
+        pwd = request.args.get('pwd')
+    except:
+        pwd = ''
+    try:
+        type = request.args.get('type')
+    except:
+        type = ''
 
     fid = url.split('/')[3]
-    download_info = get_download_info(fid, pwd, 0)
+    download_info = get_download_info(fid, pwd, 1)
     if download_info['downUrl'].find('development') < 0:
-        download_info = get_download_info(fid, pwd, 1)
+        download_info = get_download_info(fid, pwd, 0)
 
     if download_info['downUrl'].find('development') >= 0:
         if type == 'down':
             return redirect(download_info['downUrl'])
         else:
-            return jsonify({'code': 200, 'msg': 'success',
-                            'data': download_info})
+            response = make_response(jsonify({'code': 200, 'msg': 'success',
+                                              'data': download_info}))
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            return response
 
     abort(404)
 
@@ -135,7 +140,9 @@ def redirect_to_download_server():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def handle_invalid_usage(error):
-    return jsonify({'code': 404, 'msg': 'not found'})
+    response = make_response(jsonify({'code': 404, 'msg': 'not found'}))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 if __name__ == '__main__':

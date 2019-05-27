@@ -27,8 +27,9 @@ Method: GET
 | -------------- | ------ | ------------ | --------- |
 | code           | 200    | status code  | success   |
 | code           | 400    | status code  | not found |
-| data[filename] |        | filename     |
-| data[downUrl]  |        | download url |
+| data[filename] |        | filename     |           |
+| data[filesize] |        | filesize     |           |
+| data[downUrl]  |        | download url |           |
 
 ### Example:
 

@@ -10,10 +10,10 @@ def get_fileinfo(fid, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
         filename = str(re.findall(r"<title>(.+) -", response.text)[0])
-        filesize = str(re.findall(r"<span class=\"mtt\">\( (.+) \)</span>", response.text)[0])
+        filesize = str(re.findall(r"<span class=\".+\">\( (.+) \)</span>", response.text)[0])
         return {'filename': filename, 'filesize': filesize}
     except:
-        return None
+        return {'filename': '', 'filesize': ''}
 
 
 def get_para_simulate_pc(fid, pwd, host, headers):
@@ -39,8 +39,8 @@ def get_para_simulate_pc(fid, pwd, host, headers):
 def get_link_simulate_phone(fid, host, headers):
     try:
         response = requests.get(url=host + '/tp/' + fid, headers=headers)
-        urlp = str(re.findall(r"urlp = \'(.*)\'", response.text)[0])
-        para = str(re.findall(r"urlp \+ \'(.*)\'", response.text)[0])
+        urlp = str(re.findall(r"url.+ = \'(.+)\'", response.text)[0])
+        para = str(re.findall(r"url.+ \+ \"(.+)\"", response.text)[0])
         return urlp + para
     except:
         return None
@@ -79,17 +79,17 @@ def get_download_info(fid, pwd, type):
         fakeurl = get_link_simulate_phone(fid, host, headers)
 
     try:
-        if 'fakeurl' not in dir() or not fakeurl:
+        headers['User-Agent'] = ua[1]
+        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
+        if data:
             response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
             result = json.loads(response.text)
             fakeurl = result['dom'] + '/file/' + result['url']
-
-        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
-        response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
-        headers['User-Agent'] = ua[1]
+            response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
+        else:
+            response = requests.get(url=fakeurl, headers=headers, allow_redirects=False)
         fileinfo = get_fileinfo(fid, host, headers)
-        return {'filename': fileinfo['filename'],
-                'filesize': fileinfo['filesize'], 'downUrl': response.headers['Location']}
+        return {**fileinfo, 'downUrl': response.headers['Location']}
     except:
         return {'filename': '', 'filesize': '', 'downUrl': ''}
 
