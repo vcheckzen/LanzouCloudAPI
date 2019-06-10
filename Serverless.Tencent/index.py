@@ -6,6 +6,7 @@ import json
 import requests
 
 
+
 def get_fileinfo(fid, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
@@ -21,17 +22,7 @@ def get_para_simulate_pc(fid, pwd, host, headers):
         response = requests.get(url=host + '/' + fid, headers=headers)
         frame = str(re.findall(r"src=\"(.*)\" frameborder", response.text)[0])
         response = requests.get(url=host + frame, headers=headers)
-        file_id = str(re.findall(r"\'(.{7})\'", response.text)[0])
-        t = str(re.findall(r"\'(.{10})\'", response.text)[0])
-        k = str(re.findall(r"\'(.{32})\'", response.text)[0])
-        return {
-            'action': 'down_process',
-            'file_id': file_id,
-            't': t,
-            'k': k,
-            'p': pwd,
-            'c': ''
-        }
+        return eval(str(re.findall(r"data : ({.+}),", response.text)[0]))
     except:
         return None
 
@@ -39,8 +30,8 @@ def get_para_simulate_pc(fid, pwd, host, headers):
 def get_link_simulate_phone(fid, host, headers):
     try:
         response = requests.get(url=host + '/tp/' + fid, headers=headers)
-        urlp = str(re.findall(r"url.+ = \'(.+)\'", response.text)[0])
-        para = str(re.findall(r"url.+ \+ \"(.+)\"", response.text)[0])
+        urlp = str(re.findall(r"var url.+ = \'(.+)\'", response.text)[0])
+        para = str(re.findall(r"= url.+ \+ \"(.+)\"", response.text)[0])
         return urlp + para
     except:
         return None
@@ -68,7 +59,8 @@ def get_download_info(fid, pwd, type):
     ]
     headers = {
         'User-Agent': ua[type],
-        'Referer': host
+        'Referer': host,
+        'Accept-Language': 'zh-CN,zh;q=0.9'
     }
 
     if type == 0:
@@ -80,15 +72,15 @@ def get_download_info(fid, pwd, type):
 
     try:
         headers['User-Agent'] = ua[1]
-        headers['Accept-Language'] = 'zh-CN,zh;q=0.9'
-        if data:
+        if 'data' in dir():
             response = requests.post(url=host + '/ajaxm.php', headers=headers, data=data)
             result = json.loads(response.text)
             fakeurl = result['dom'] + '/file/' + result['url']
             response = requests.get(url=fakeurl, headers=headers, data=data, allow_redirects=False)
-        else:
+        elif fakeurl is not None:
             response = requests.get(url=fakeurl, headers=headers, allow_redirects=False)
-        fileinfo = get_fileinfo(fid, host, headers)
+        if response.headers['Location']:
+            fileinfo = get_fileinfo(fid, host, headers)
         return {**fileinfo, 'downUrl': response.headers['Location']}
     except:
         return {'filename': '', 'filesize': '', 'downUrl': ''}
