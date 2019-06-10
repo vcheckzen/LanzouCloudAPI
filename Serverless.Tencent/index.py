@@ -6,7 +6,6 @@ import json
 import requests
 
 
-
 def get_fileinfo(fid, host, headers):
     try:
         response = requests.get(url=host + '/' + fid, headers=headers)
@@ -81,7 +80,7 @@ def get_download_info(fid, pwd, type):
             response = requests.get(url=fakeurl, headers=headers, allow_redirects=False)
         if response.headers['Location']:
             fileinfo = get_fileinfo(fid, host, headers)
-        return {**fileinfo, 'downUrl': response.headers['Location']}
+            return {**fileinfo, 'downUrl': response.headers['Location']}
     except:
         return {'filename': '', 'filesize': '', 'downUrl': ''}
 

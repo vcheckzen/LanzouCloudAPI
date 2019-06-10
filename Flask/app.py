@@ -7,6 +7,7 @@ import json
 import requests
 from flask import Flask, request, redirect, send_from_directory, jsonify, abort, make_response
 
+
 app = Flask(__name__)
 port = int(os.getenv('PORT', '3000'))
 
@@ -85,7 +86,7 @@ def get_download_info(fid, pwd, type):
             response = requests.get(url=fakeurl, headers=headers, allow_redirects=False)
         if response.headers['Location']:
             fileinfo = get_fileinfo(fid, host, headers)
-        return {**fileinfo, 'downUrl': response.headers['Location']}
+            return {**fileinfo, 'downUrl': response.headers['Location']}
     except:
         return {'filename': '', 'filesize': '', 'downUrl': ''}
 
