@@ -8,10 +8,10 @@ Method: GET
 
 | Params | Option | Remark   | Meaning                     |
 | ------ | ------ | -------- | --------------------------- |
-| url    |        | required | sharing link                |
-| pwd    |        |          | password                    |
-| type   |        |          | return download info        |
-| type   | down   |          | redirect to download server |
+| url    |        | Required | Sharing Link                |
+| pwd    |        |          | Password                    |
+| type   |        |          | Return Download Information |
+| type   | down   |          | Redirect to Download Server |
 
 ## Response
 
@@ -23,13 +23,13 @@ Method: GET
 
 ### Body
 
-| Params         | Option | Remark       | Msg       |
-| -------------- | ------ | ------------ | --------- |
-| code           | 200    | status code  | success   |
-| code           | 404    | status code  | not found |
-| data[filename] |        | filename     |           |
-| data[filesize] |        | filesize     |           |
-| data[downUrl]  |        | download url |           |
+| Params                       | Option | Remark       | Msg       |
+| ---------------------------- | ------ | ------------ | --------- |
+| code                         | 200    | Status Code  | success   |
+| code                         | 404    | Status Code  | not found |
+| data['downloadUrl']          |        | Download Url |           |
+| data['fileInfo']['fileName'] |        | File Name    |           |
+| data['fileInfo']['filesize'] |        | File Size    |           |
 
 ## Example:
 
@@ -48,9 +48,11 @@ Host: localhost:3000
 {
     "code": 200,
     "data": {
-        "downUrl": "https://development56.baidupan.com/052805bb/2019/05/12/5b85e328ab5c326e411893721c56d811.apk?st=ldq-ZiEM5GTsM5uCf3QucQ&e=1558994394&b=CDUPfQZhVH9UdQMwAT1UNVJgAC4EZAFqVShdPVQ2B3ZUdQhtAmwFZ1hoXnoDDAc2UikMZlB_aAjUDfQs3VGYCOQhqDz8GWVQ8VGgDOwEQVABSTgBtBDMBKVVnXSBUOA_c_c&fi=8662345&up=",
-        "filename": "org.telegram.messenger_5.6.1-15900_minAPI16.apk",
-        "filesize": "27.2 M"
+        "downloadUrl": "https://development56.baidupan.com/052805bb/2019/05/12/5b85e328ab5c326e411893721c56d811.apk?st=ldq-ZiEM5GTsM5uCf3QucQ&e=1558994394&b=CDUPfQZhVH9UdQMwAT1UNVJgAC4EZAFqVShdPVQ2B3ZUdQhtAmwFZ1hoXnoDDAc2UikMZlB_aAjUDfQs3VGYCOQhqDz8GWVQ8VGgDOwEQVABSTgBtBDMBKVVnXSBUOA_c_c&fi=8662345&up=",
+        "fileInfo": {
+          "fileName": "org.telegram.messenger_5.6.1-15900_minAPI16.apk",
+          "fileSize": "27.2 M"
+        }
     },
     "msg": "success"
 }
