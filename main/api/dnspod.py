@@ -7,8 +7,8 @@ from ..util import post_urlencoded_data as post
 API = 'https://dnsapi.cn/Record.List'
 PARAMS = {
     'login_token': '',
-    'domain': 'logi.ml',
-    'sub_domain': 'n1',
+    'domain': '',
+    'sub_domain': '',
     'format': 'json',
     'lang': 'en',
     'error_on_empty': 'yes'

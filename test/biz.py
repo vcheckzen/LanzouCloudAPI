@@ -32,7 +32,7 @@ def dp():
 
 def lz():
     request('/lanzous/')
-    request('/lanzous/?url=https://www.a.com/i5tb0vg')
+    request('/lanzous/?url=https://www.lanzous.com/i871yaf')
     request('/lanzous/?url=https://www.lanzous.com/i5tb0vg')
     request('/lanzous/?url=https://www.lanzous.com/i19pnjc&pwd=1pud&type=down')
 

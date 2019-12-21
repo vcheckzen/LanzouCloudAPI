@@ -48,8 +48,8 @@ def gen_error(key, content=None):
 
 def query(gateway):
     global GATE_WAY
-    global TODAY
     GATE_WAY = gateway
+    global TODAY
     TODAY = formated_today()
     print(TODAY)
     try:
