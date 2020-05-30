@@ -103,7 +103,7 @@ def fetch(path=None):
 
 def fetch_files(path=None, file_name=None, passwd=None):
     body = fetch(path)
-    if file_name and file_name != PASSWORD_FILENAME:
+    if file_name:
         for file in body['children']:
             if file['name'] == file_name:
                 return file['@microsoft.graph.downloadUrl']
@@ -167,6 +167,8 @@ def query(gateway, queryString=None, body=None):
         if 'file' in queryString:
             FILE_NAME = queryString['file'].split('/').pop()
             REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
+            if FILE_NAME == PASSWORD_FILENAME:
+                return gen_resp('url', 'https://www.baidu.com/s?wd=%E6%80%8E%E6%A0%B7%E7%9B%97%E5%8F%96%E5%AF%86%E7%A0%81')
             return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
         elif body:
             PARAMS = split_url(body)['params']
