@@ -163,26 +163,16 @@ def return_file_array(path, encrypted, plain, passwd):
 def query(gateway, queryString=None, body=None):
     global GATE_WAY
     GATE_WAY = gateway
-    # try:
-    #     if 'file' in queryString:
-    #         FILE_NAME = queryString['file'].split('/').pop()
-    #         REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
-    #         return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
-    #     elif body:
-    #         PARAMS = split_url(body)['params']
-    #         return return_file_array(
-    #             urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
-    #     else:
-    #         return return_access_token()
-    # except Exception:
-    #     return gen_resp('server')
-    if 'file' in queryString:
-        FILE_NAME = queryString['file'].split('/').pop()
-        REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
-        return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
-    elif body:
-        PARAMS = split_url(body)['params']
-        return return_file_array(
-            urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
-    else:
-        return return_access_token()
+    try:
+        if 'file' in queryString:
+            FILE_NAME = queryString['file'].split('/').pop()
+            REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
+            return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
+        elif body:
+            PARAMS = split_url(body)['params']
+            return return_file_array(
+                urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
+        else:
+            return return_access_token()
+    except Exception:
+        return gen_resp('server')
