@@ -25,19 +25,23 @@ def get_params(fid, pwd, client):
         if pwd:
             params = find(text, r"data : '(.+)'\+pwd") + pwd
         else:
-            frame = find(text, r"src=\"(.{10,})\" frameborder")
+            frame = find(text, r'src="(.{10,})" frameborder')
             text = get(HOST + frame, client).text
-            data = eval(find(text, r"[^//]data : ({.+}),"))
+            try:
+                data = eval(find(text, r"data : ({.+}),//"))
+            except Exception:
+                exec(find(text, r"var (.+ = '[\w/_+=]{10,}')"))
+                data = eval(find(text, r"data : ({.+}),//"))
             params = urlencode(data, quote_via=quote_plus)
         return {'params': params}
     else:
         text = get(HOST + '/tp/' + fid, client).text
         if pwd:
-            params = find(text, r"data : \'(.*)\'\+pwd") + pwd
+            params = find(text, r"data : '(.*)'\+pwd") + pwd
             return {'params': params}
         else:
-            urlp = find(text, r"var url.+ = \'(.+)\'")
-            params = find(text, r"var sgo = '(.+)'")
+            urlp = find(text, r"var.+= '(.+baidu.+)'")
+            params = find(text, r"\+ '(\?[\w/+=]+)'")
             return {'params': urlp+params}
 
 
@@ -53,7 +57,7 @@ def get_download_info(fid, pwd, client):
     return {'url': response.headers['location']}
 
 
-def gen_error(key, download_info={'url': None}):
+def gen_resp(key, download_info={'url': None}):
     return {
         'default': {
             'code': -1,
@@ -85,11 +89,11 @@ def gen_error(key, download_info={'url': None}):
 
 def params_check(queryString):
     if 'url' not in queryString:
-        return gen_error('default')
+        return gen_resp('default')
 
     url = queryString['url']
     if not re.match(HOST + '/[0-9a-z]{7,}', url):
-        return gen_error('link')
+        return gen_resp('link')
 
     result = {
         'code': 0,
@@ -110,7 +114,7 @@ def result_check(result):
     return False
 
 
-def query(gateway, queryString):
+def query(gateway, queryString, *extra):
     global GATE_WAY
     GATE_WAY = gateway
     params = params_check(queryString)
@@ -123,8 +127,8 @@ def query(gateway, queryString):
         try:
             download_info = get_download_info(fid, pwd, client)
             if result_check(download_info):
-                return gen_error(params['type'], download_info)
+                return gen_resp(params['type'], download_info)
         except Exception:
             pass
 
-    return gen_error('api')
+    return gen_resp('api')

@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-from .biz import aes, cb, cm, dp, lz, px, qr, wx, fodi
+__all__ = [
+    'cb',
+    'cm',
+    'dp',
+    'lz',
+    'px',
+    'qr',
+    'wx',
+    'aes',
+    'fodi'
+]
 
-
-__all__ = ['aes', 'cb', 'cm', 'dp', 'lz', 'px', 'qr', 'wx', 'fodi']
+for t in __all__:
+    exec('from .biz import ' + t)

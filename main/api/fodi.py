@@ -6,25 +6,51 @@ from ..util import (urlencode, urldecode, split_url, get, post_urlencoded_data a
                     aes_ecb_pkcs7_b64_encrypt as encrypt,
                     aes_ecb_pkcs7_b64_decrypt as decrypt)
 
-
+"""
+IS_CN: 如果为世纪互联版本，请将 0 改为 1
+EXPOSE_PATH：暴露路径，如全盘展示请留空，否则按 '/媒体/音乐' 的格式填写
+ONEDRIVE_REFRESHTOKEN: refresh_token
+"""
+IS_CN = 0
 EXPOSE_PATH = ""
 ONEDRIVE_REFRESHTOKEN = ""
 
-
+PASSWORD_FILENAME = ".password"
 SECRET = ONEDRIVE_REFRESHTOKEN[:16]
+
+clientId = [
+    '4da3e7f2-bf6d-467c-aaf0-578078f0bf7c',
+    '04c3ca0b-8d07-4773-85ad-98b037d25631'
+
+]
+clientSecret = [
+    '7/+ykq2xkfx:.DWjacuIRojIaaWL0QI6',
+    'h8@B7kFVOmj0+8HKBWeNTgl@pU/z4yLB'
+]
+
+oauthHost = [
+    'https://login.microsoftonline.com',
+    'https://login.partner.microsoftonline.cn'
+]
+
+apiHost = [
+    'https://graph.microsoft.com',
+    'https://microsoftgraph.chinacloudapi.cn'
+]
+
 OAUTH = {
     'redirectUri': 'https://scfonedrive.github.io',
     'refreshToken': ONEDRIVE_REFRESHTOKEN,
-    'clientId': '4da3e7f2-bf6d-467c-aaf0-578078f0bf7c',
-    'clientSecret': '7/+ykq2xkfx:.DWjacuIRojIaaWL0QI6',
-    'oauthUrl': 'https://login.microsoftonline.com/common/oauth2/v2.0/',
-    'apiUrl': 'https://graph.microsoft.com/v1.0/me/drive/root',
-    'scope': 'https://graph.microsoft.com/Files.ReadWrite.All offline_access'
+    'clientId': clientId[IS_CN],
+    'clientSecret': clientSecret[IS_CN],
+    'oauthUrl': oauthHost[IS_CN] + '/common/oauth2/v2.0/',
+    'apiUrl': apiHost[IS_CN] + '/v1.0/me/drive/root',
+    'scope': apiHost[IS_CN] + '/Files.ReadWrite.All offline_access'
 }
 GATE_WAY = ''
 
 
-def gen_error(key, url=None, content={}):
+def gen_resp(key, url=None, content={}):
     return {
         'success': {
             'code': 0,
@@ -59,16 +85,12 @@ def get_content(url, params=None, extra=None):
 
 
 def fetch(path=None):
-    if not path or path == '/':
-        if EXPOSE_PATH == '':
-            path = ''
-        else:
-            path = ':' + EXPOSE_PATH
-    else:
-        if EXPOSE_PATH == '':
-            path = ':' + path
-        else:
-            path = ':' + EXPOSE_PATH + path
+    if path == '/':
+        path = ''
+
+    if path or EXPOSE_PATH:
+        path = ':' + EXPOSE_PATH + path
+
     url = OAUTH['apiUrl'] + path
     params = {
         'expand': 'children(select=name,size,parentReference,lastModifiedDateTime,@microsoft.graph.downloadUrl)'
@@ -81,7 +103,7 @@ def fetch(path=None):
 
 def fetch_files(path=None, file_name=None, passwd=None):
     body = fetch(path)
-    if file_name is not None and file_name != '.password':
+    if file_name and file_name != PASSWORD_FILENAME:
         for file in body['children']:
             if file['name'] == file_name:
                 return file['@microsoft.graph.downloadUrl']
@@ -90,7 +112,7 @@ def fetch_files(path=None, file_name=None, passwd=None):
         encrypted = False
         for i in list(range(len(body['children']))):
             file = body['children'][i]
-            if file['name'] == '.password':
+            if file['name'] == PASSWORD_FILENAME:
                 PASSWD = get_content(file['@microsoft.graph.downloadUrl'])
                 if PASSWD != passwd:
                     encrypted = True
@@ -121,7 +143,7 @@ def fetch_files(path=None, file_name=None, passwd=None):
 def return_access_token():
     access_token = get_access_token()
     encrypted = encrypt(access_token[:16], SECRET)
-    return gen_error('success', content={
+    return gen_resp('success', content={
         'encrypted': urlencode(encrypted),
         'plain': urlencode(access_token[16:])
     })
@@ -130,27 +152,37 @@ def return_access_token():
 def redirect_to_download_server(path, file_name):
     OAUTH['accessToken'] = get_access_token()
     URL = fetch_files(path, file_name)
-    return gen_error('url', URL)
+    return gen_resp('url', URL)
 
 
 def return_file_array(path, encrypted, plain, passwd):
     OAUTH['accessToken'] = decrypt(encrypted, SECRET) + plain
-    return gen_error('success', content=fetch_files(path, None, passwd))
+    return gen_resp('success', content=fetch_files(path, None, passwd))
 
 
 def query(gateway, queryString=None, body=None):
     global GATE_WAY
     GATE_WAY = gateway
-    try:
-        if 'file' in queryString:
-            FILE_NAME = queryString['file'].split('/').pop()
-            REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
-            return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
-        elif body is not None:
-            PARAMS = split_url(body)['params']
-            return return_file_array(
-                urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
-        else:
-            return return_access_token()
-    except Exception:
-        return gen_error('server')
+    # try:
+    #     if 'file' in queryString:
+    #         FILE_NAME = queryString['file'].split('/').pop()
+    #         REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
+    #         return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
+    #     elif body:
+    #         PARAMS = split_url(body)['params']
+    #         return return_file_array(
+    #             urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
+    #     else:
+    #         return return_access_token()
+    # except Exception:
+    #     return gen_resp('server')
+    if 'file' in queryString:
+        FILE_NAME = queryString['file'].split('/').pop()
+        REQUEST_PATH = queryString['file'].replace('/' + FILE_NAME, '')
+        return redirect_to_download_server(REQUEST_PATH, FILE_NAME)
+    elif body:
+        PARAMS = split_url(body)['params']
+        return return_file_array(
+            urldecode(PARAMS['path']), PARAMS['encrypted'], PARAMS['plain'], PARAMS['passwd'])
+    else:
+        return return_access_token()
