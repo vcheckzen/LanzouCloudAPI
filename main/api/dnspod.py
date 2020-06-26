@@ -8,7 +8,7 @@ API = 'https://dnsapi.cn/Record.List'
 PARAMS = {
     'login_token': '',
     'domain': '',
-    'sub_domain': '',
+    'sub_domain': 'n1',
     'format': 'json',
     'lang': 'en',
     'error_on_empty': 'yes'

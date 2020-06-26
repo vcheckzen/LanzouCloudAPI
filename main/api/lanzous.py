@@ -23,25 +23,24 @@ def get_params(fid, pwd, client):
     if client == 'pc':
         text = get(HOST + '/' + fid, client).text
         if pwd:
-            params = find(text, r"data : '(.+)'\+pwd") + pwd
+            params = find(text, r"[^//]data : '(.+)'\+pwd") + pwd
         else:
             frame = find(text, r'src="(.{10,})" frameborder')
             text = get(HOST + frame, client).text
-            try:
-                data = eval(find(text, r"data : ({.+}),//"))
-            except Exception:
-                exec(find(text, r"var (.+ = '[\w/_+=]{10,}')"))
-                data = eval(find(text, r"data : ({.+}),//"))
+            # print(text)
+            exec(find(text, r"[^//]var (.+ = '[\w/_+=]{10,}')"))
+            data = eval(find(text, r"[^//]data : ({.+})"))
             params = urlencode(data, quote_via=quote_plus)
         return {'params': params}
     else:
         text = get(HOST + '/tp/' + fid, client).text
+        # print(text)
         if pwd:
-            params = find(text, r"data : '(.*)'\+pwd") + pwd
+            params = find(text, r"[^//]data : '(.+)'\+pwd") + pwd
             return {'params': params}
         else:
-            urlp = find(text, r"var.+= '(.+baidu.+)'")
-            params = find(text, r"\+ '(\?[\w/+=]+)'")
+            urlp = find(text, r"[^//]var.+= '(http[\w:/\-\.]{10,})'")
+            params = find(text, r"[^//]var.+= '(\?[\w/+=]+)'")
             return {'params': urlp+params}
 
 
@@ -92,7 +91,7 @@ def params_check(queryString):
         return gen_resp('default')
 
     url = queryString['url']
-    if not re.match(HOST + '/[0-9a-z]{7,}', url):
+    if not re.match(HOST + '/[\w]{7,}', url):
         return gen_resp('link')
 
     result = {
