@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from .qrcode import qrencode
-from .crypto import aes_ecb_pkcs7_b64_encrypt, aes_ecb_pkcs7_b64_decrypt
+from .crypto import aes_ecb_pkcs7_b64_encrypt, aes_ecb_pkcs7_b64_decrypt, aes_ecb_pkcs7_hex_encrypt
 from .browser import urlencode, urldecode, split_url, get, post, post_json, post_urlencoded_data, find_first, find_all
 
 
@@ -18,5 +18,6 @@ __all__ = [
     'find_first',
     'aes_ecb_pkcs7_b64_encrypt',
     'aes_ecb_pkcs7_b64_decrypt',
-    'qrencode'
+    'aes_ecb_pkcs7_hex_encrypt',
+    'qrencode',
 ]

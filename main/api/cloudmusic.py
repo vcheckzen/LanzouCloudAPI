@@ -2,7 +2,8 @@
 # -*- coding:utf-8 -*-
 
 import json
-from ..util import get as cloudmusic_get, post_urlencoded_data as cloudmusic_post, find_first, find_all
+from ..util import get as cloudmusic_get, post_urlencoded_data as cloudmusic_post, find_first, find_all, aes_ecb_pkcs7_hex_encrypt as aes
+
 
 HOST = 'https://music.163.com'
 GATE_WAY = ''
@@ -13,7 +14,7 @@ def get(url):
 
 
 def post(url, data):
-    return cloudmusic_post(url, data, 'pc', HOST)
+    return cloudmusic_post(url, data, 'pc', HOST, {'cookie': 'os=linux'})
 
 
 def get_ids(list_id):
@@ -46,11 +47,17 @@ def get_song_info(song_id):
 
 
 def get_songs_info_from_api(list_id):
-    content = post(HOST + '/api/v3/playlist/detail', {
-        'id': list_id,
-        'n': 100000,
-        's': 8
-    }).text
+    params = {
+        'eparams': aes(json.dumps({
+            'url': HOST + '/api/v3/playlist/detail',
+            'params': {
+                'id': list_id,
+                'n': 100000,
+                's': '8'
+            },
+            'method': 'POST',
+        }), 'rFgB&h#%2?^eDg:Q')}
+    content = post(HOST + '/api/linux/forward', params).text
     content = json.loads(content)['playlist']['tracks']
     songs = []
     for song in content:
