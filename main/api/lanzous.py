@@ -22,13 +22,17 @@ def post(url, data, client):
 def get_params(fid, pwd, client):
     if client == 'pc':
         text = get(HOST + '/' + fid, client).text
+        # print(text)
         if pwd:
             params = find(text, r"[^//]data : '(.+)'\+pwd") + pwd
         else:
             frame = find(text, r'src="(.{10,})" frameborder')
             text = get(HOST + frame, client).text
             # print(text)
-            exec(find(text, r"[^//]var (.+ = '[\w/_+=]{10,}')"))
+            try:
+                exec(find(text, r"[^//]var (.+ = '[\w/_+=]{10,}')"))
+            except Exception:
+                pass
             data = eval(find(text, r"[^//]data : ({.+})"))
             params = urlencode(data, quote_via=quote_plus)
         return {'params': params}
@@ -36,11 +40,12 @@ def get_params(fid, pwd, client):
         text = get(HOST + '/tp/' + fid, client).text
         # print(text)
         if pwd:
-            params = find(text, r"[^//]data : '(.+)'\+pwd") + pwd
+            # params = find(text, r"[^//]data : '(.+)'\+pwd") + pwd
+            params = eval(find(text, r"[^//]data : ({.+})"))
             return {'params': params}
         else:
             urlp = find(text, r"[^//]var.+= '(http[\w:/\-\.]{10,})'")
-            params = find(text, r"[^//]var.+= '(\?[\w/+=]+)'")
+            params = find(text, r"[^//]\+ '(\?[\w/+=]{30,})'")
             return {'params': urlp+params}
 
 
