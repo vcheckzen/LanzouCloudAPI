@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
 poetry install
 cp lanzous.service /etc/systemd/system/
 systemctl daemon-reload
