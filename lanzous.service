@@ -1,0 +1,12 @@
+[Unit]
+Description=flowerss
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/lanzous.pid
+ExecStart=poetry shell && python /usr/local/share/logi/LanzouCloudAPI/index.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
