@@ -39,3 +39,13 @@ Location: https://developer82.baidupan.com/040305bb/2019/12/03/96a3256ec57b632c3
 Server: Werkzeug/1.0.1 Python/3.9.2
 Date: Fri, 02 Apr 2021 21:17:25 GMT
 ```
+
+## Reverse Proxy
+
+```nginx
+location /lanzous/ {
+    proxy_pass http://localhost:3000/;
+    proxy_redirect off;
+    proxy_set_header Host $http_host;
+}
+```
