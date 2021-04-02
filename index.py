@@ -111,7 +111,7 @@ def get_full_info(url):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    if not re.match('.+/\?url=https:%2F%2F.*lanzous\.com%2F[0-9a-z]{7,}.*',
+    if not re.match('.+\?.*url=https:%2F%2F.*lanzous\.com%2F[\w]{7,}.*',
                     request.url):
         response = make_response(
             jsonify({
