@@ -108,7 +108,7 @@ def get_full_info(url):
     }
 
 
-def gen_json_reponse(code, msg, extra={}):
+def gen_json_response(code, msg, extra={}):
     return make_response(jsonify({
         'code': code,
         'msg': msg,
@@ -119,9 +119,8 @@ def gen_json_reponse(code, msg, extra={}):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    if not re.match('.+\?.*url=https:%2F%2F.*lanzous\.com%2F[\w]{7,}.*',
-                    request.url):
-        return gen_json_reponse(
+    if not re.match('.+\?.*url=.*lanzous\.com%2F[\w]{7,}.*', request.url):
+        return gen_json_response(
             -1,
             'invalid link',
             {
@@ -135,20 +134,22 @@ def catch_all(path):
     url = request.args.get('url')
     pwd = request.args.get('pwd')
     data_type = request.args.get('type')
-    fid = url.split('/')[3]
+    fid = url.split('/')[-1]
 
     for client in [Client.MOBILE, Client.PC]:
         try:
             url = get_url(fid, client, pwd)
-            if url.find('dev') >= 0:
-                if data_type == 'down':
-                    return redirect(url)
-                else:
-                    return gen_json_reponse(
-                        200,
-                        'success',
-                        {'data': get_full_info(url)}
-                    )
+            if url.find('dev') < 0:
+                continue
+
+            if data_type == 'down':
+                return redirect(url)
+            else:
+                return gen_json_response(
+                    200,
+                    'success',
+                    {'data': get_full_info(url)}
+                )
         except Exception:
             pass
 
@@ -157,7 +158,7 @@ def catch_all(path):
 
 @app.errorhandler(500)
 def server_error(error):
-    return gen_json_reponse(
+    return gen_json_response(
         -2,
         'link not match pwd, or lanzous has changed their webpage',
     )
