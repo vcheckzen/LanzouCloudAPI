@@ -91,7 +91,7 @@ def get_url(fid, client: Client, pwd=None):
     return response.headers['location']
 
 
-def sizeof_fmt(num, suffix='B'):
+def fmt_size(num, suffix='B'):
     for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
@@ -103,9 +103,17 @@ def get_full_info(url):
     headers = get(url, Client.PC).headers
     return {
         'name': unquote(headers.get('Content-Disposition').split('filename= ')[-1]),
-        'size': sizeof_fmt(int(headers.get('Content-Length'))),
+        'size': fmt_size(int(headers.get('Content-Length'))),
         'url': url,
     }
+
+
+def gen_json_reponse(code, msg, extra={}):
+    return make_response(jsonify({
+        'code': code,
+        'msg': msg,
+        **extra
+    }))
 
 
 @app.route('/', defaults={'path': ''})
@@ -113,38 +121,34 @@ def get_full_info(url):
 def catch_all(path):
     if not re.match('.+\?.*url=https:%2F%2F.*lanzous\.com%2F[\w]{7,}.*',
                     request.url):
-        response = make_response(
-            jsonify({
-                'code': -1,
-                'msg': 'invalid link',
+        return gen_json_reponse(
+            -1,
+            'invalid link',
+            {
                 'examples': [
-                    f'{request.host_url}?url=https://lanzous.com/i4wk2oh&type=down',
-                    f'{request.host_url}?url=https://lanzous.com/i7tit9c&pwd=6svq&type=json',
+                    f'{request.host_url}?url={HOST}/i4wk2oh&type=down',
+                    f'{request.host_url}?url={HOST}/i7tit9c&pwd=6svq&type=json',
                 ]
-            }))
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        return response
+            }
+        )
 
     url = request.args.get('url')
     pwd = request.args.get('pwd')
-    type = request.args.get('type')
+    data_type = request.args.get('type')
     fid = url.split('/')[3]
 
     for client in [Client.MOBILE, Client.PC]:
         try:
             url = get_url(fid, client, pwd)
             if url.find('dev') >= 0:
-                if type == 'down':
+                if data_type == 'down':
                     return redirect(url)
                 else:
-                    response = make_response(
-                        jsonify({
-                            'code': 200,
-                            'msg': 'success',
-                            'data': get_full_info(url)
-                        }))
-                    response.headers['Access-Control-Allow-Origin'] = '*'
-                    return response
+                    return gen_json_reponse(
+                        200,
+                        'success',
+                        {'data': get_full_info(url)}
+                    )
         except Exception:
             pass
 
@@ -153,11 +157,14 @@ def catch_all(path):
 
 @app.errorhandler(500)
 def server_error(error):
-    response = make_response(
-        jsonify({
-            'code': -2,
-            'msg': 'link and pwd not match, or lanzous may have changed their website'
-        }))
+    return gen_json_reponse(
+        -2,
+        'link not match pwd, or lanzous has changed their webpage',
+    )
+
+
+@app.after_request
+def cors(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
