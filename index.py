@@ -13,7 +13,7 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.config['JSON_AS_ASCII'] = False
 
 port = int(os.getenv('PORT', '3000'))
-HOST = 'https://lanzous.com'
+ORIGIN = 'http://pan.lanzou.com'
 
 
 class Client(Enum):
@@ -24,7 +24,7 @@ class Client(Enum):
 def gen_headers(client: Client):
     return {
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-        'Referer': HOST,
+        'Referer': ORIGIN,
         'User-Agent': [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
             'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Mobile Safari/537.36'
@@ -51,12 +51,12 @@ def find_first(pattern, text):
 
 def get_params(fid, client: Client, pwd=None):
     if client == Client.PC:
-        text = get(f'{HOST}/{fid}', client).text
+        text = get(f'{ORIGIN}/{fid}', client).text
         if pwd:
             params = find_first(r"[^/]{2,}data : '(.+)'\+pwd", text) + pwd
         else:
             fn = find_first(r'src="(.{20,})" frameborder', text)
-            text = get(f'{HOST}/{fn}',  client).text
+            text = get(f'{ORIGIN}/{fn}',  client).text
 
             try:
                 exec(find_first(
@@ -68,7 +68,7 @@ def get_params(fid, client: Client, pwd=None):
             data = eval(find_first(r"[^/]{2,}data : ({.+})", text))
             params = urlencode(data, quote_via=quote_plus)
     else:
-        text = get(f'{HOST}/tp/{fid}', client).text
+        text = get(f'{ORIGIN}/tp/{fid}', client).text
         if pwd:
             params = eval(find_first(r"[^/]{2,}data : ({.+})", text))
         else:
@@ -83,7 +83,7 @@ def get_url(fid, client: Client, pwd=None):
     if client == Client.MOBILE and not pwd:
         response = get(params, client)
     else:
-        result = post_data(f'{HOST}/ajaxm.php', params, client)
+        result = post_data(f'{ORIGIN}/ajaxm.php', params, client)
         result = result.json()
         fake_url = f"{result['dom']}/file/{result['url']}"
         response = get(fake_url, client)
@@ -119,14 +119,14 @@ def gen_json_response(code, msg, extra={}):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    if not re.match('.+\?.*url=.*lanzous\.com%2F[\w]{7,}.*', request.url):
+    if not re.match('.+\?.*url=.*lanzou.*\.com%2F[\w]{7,}.*', request.url):
         return gen_json_response(
             -1,
             'invalid link',
             {
                 'examples': [
-                    f'{request.host_url}?url={HOST}/i4wk2oh&type=down',
-                    f'{request.host_url}?url={HOST}/i7tit9c&pwd=6svq&type=json',
+                    f'{request.host_url}?url={ORIGIN}/i4wk2oh&type=down',
+                    f'{request.host_url}?url={ORIGIN}/i7tit9c&pwd=6svq&type=json',
                 ]
             }
         )
