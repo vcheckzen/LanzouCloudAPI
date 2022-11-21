@@ -1,5 +1,5 @@
 {
-  "python.pythonPath": ".venv\\Scripts\\python.exe",
+  "python.pythonPath": ".venv\\bin\\python.exe",
   // https://stackoverflow.com/questions/47406741/disable-auto-wrap-long-line-in-visual-studio-code
   "python.formatting.provider": "autopep8",
   "python.formatting.autopep8Args": [

@@ -4,8 +4,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Environment="HTTP_PROXY=http://127.0.0.1:8888"
-Environment="HTTPS_PROXY=http://127.0.0.1:8888"
+#Environment="HTTP_PROXY=http://127.0.0.1:8888"
+#Environment="HTTPS_PROXY=http://127.0.0.1:8888"
 Type=simple
 PIDFile=/var/run/lanzous.pid
 WorkingDirectory=/usr/local/share/LanzouCloudAPI

@@ -5,13 +5,14 @@ name = "lanzou-cloud-api"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
-Flask = "^1.1.2"
-python = "^3.6.0"
-requests = "^2.25.1"
+Flask = "2.2.2"
+python = "^3.7.0"
+requests = "2.28.1"
+cacheout = "0.14.1"
 
 [tool.poetry.dev-dependencies]
-autopep8 = "^1.5.6"
-rope = "^0.18.0"
+autopep8 = "1.5.6"
+rope = "0.18.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

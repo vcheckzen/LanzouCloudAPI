@@ -12,11 +12,10 @@ DOMAIN=lanzoui.com
 OLD_DOMAIN=pan.lanzou.com
 REPO=LanzouCloudAPI
 SAVE_PATH=/usr/local/share
-POETRY_INSTALATION_SCRIPT=https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+POETRY_INSTALATION_SCRIPT=https://install.python-poetry.org
 
 install() {
     curl -sSL "$POETRY_INSTALATION_SCRIPT" | python3 -
-    source $HOME/.poetry/env
 
     cd "$SAVE_PATH"
     rm -f master.tar.gz

@@ -1,20 +1,29 @@
-import re
 import os
+import re
 import sys
 from enum import Enum
-from urllib.parse import urlencode, quote_plus, unquote
+from random import randint
+from time import time
+from urllib.parse import parse_qs, quote_plus, unquote, urlencode, urlparse
 
 import requests
-from flask import Flask, request, redirect, jsonify, abort, make_response
-# from waitress import serve
+from cacheout import Cache
+from flask import Flask, abort, jsonify, make_response, redirect, request
 
+cache = Cache(maxsize=1024)
 app = Flask(__name__)
 ORIGIN = 'https://lanzoux.com'
+RAND_IP = ''
 
 
 class Client(Enum):
     PC = 0
     MOBILE = 1
+
+
+def change_ip():
+    global RAND_IP
+    RAND_IP = '.'.join(str(randint(1, 254)) for _ in range(4))
 
 
 def gen_headers(client: Client):
@@ -24,7 +33,8 @@ def gen_headers(client: Client):
         'User-Agent': [
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
             'Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Mobile Safari/537.36'
-        ][client.value]
+        ][client.value],
+        'X-Forwarded-For': RAND_IP
     }
 
 
@@ -80,6 +90,12 @@ def get_url(fid: str, client: Client, pwd=None):
 
         text = get(f'{ORIGIN}/tp/{fid}', client).text
         if pwd:
+            try:
+                for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?= *?'.*?')", text):
+                    exec(m.group(1))
+            except Exception:
+                pass
+
             params = eval(find_first(r"^[^/]+? *?data *?: *?({.+?})", text))
             fake_url = get_fake_url(params)
         else:
@@ -98,13 +114,25 @@ def fmt_size(num, suffix='B'):
     return "%.1f%s%s" % (num, 'Y', suffix)
 
 
-def get_full_info(url):
+def get_ttl(url):
+    e = parse_qs(urlparse(url).query)['e'][0]
+    return int(e) - int(time()) - 60
+
+
+def get_full_info(cache_key, ttl, url):
+    info = cache.get(cache_key)
+    if info:
+        print(f'hit cache: {info}')
+        return info
+
     headers = requests.head(url, allow_redirects=False).headers
-    return {
+    info = {
         'name': unquote(headers.get('Content-Disposition').split('filename= ')[-1]),
         'size': fmt_size(int(headers.get('Content-Length'))),
         'url': url,
     }
+    cache.set(cache_key, info, ttl=ttl)
+    return info
 
 
 def gen_json_response(code, msg, extra={}):
@@ -135,34 +163,43 @@ def catch_all(path):
     data_type = request.args.get('type')
     fid = url.split('/')[-1]
 
-    errors = []
+    def respond(url, ttl=None):
+        if data_type == 'down':
+            return redirect(url)
+        else:
+            return gen_json_response(
+                200,
+                'success',
+                {'data': get_full_info(f'{fid}/{pwd}/info', ttl, url)}
+            )
+
+    cache_key = f'{fid}/{pwd}/url'
+    url = cache.get(cache_key)
+    if url:
+        print(f'hit cache: {url}')
+        return respond(url)
+
+    change_ip()
     for client in Client:
         try:
             url = get_url(fid, client, pwd)
             # https://rollbar.com/blog/throwing-exceptions-in-python/
-            assert(url.startswith('http')), f'Parse Error: fid: {fid}, client: {client}, pwd: {pwd}, url: {url}'
+            assert (url.startswith('http')), f'Parse Error: fid: {fid}, client: {client}, pwd: {pwd}, url: {url}'
 
-            if data_type == 'down':
-                return redirect(url)
-            else:
-                return gen_json_response(
-                    200,
-                    'success',
-                    {'data': get_full_info(url)}
-                )
-        except Exception as e:
-            errors.append(e)
+            ttl = get_ttl(url)
+            cache.set(cache_key, url, ttl=ttl)
+            return respond(url, ttl)
+        except Exception:
             pass
 
-    abort(500, errors)
+    abort(500)
 
 
 @app.errorhandler(500)
-def server_error(error):
+def server_error(e):
     return gen_json_response(
         -2,
-        'link not match pwd, or lanzous has changed their webpage',
-        {'detail': str(error)}
+        'link not match pwd, or lanzous has changed their webpage'
     )
 
 
@@ -194,7 +231,4 @@ if __name__ == '__main__':
         test()
         app.config['JSON_AS_ASCII'] = False
         app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-    # else:
-        # serve(app, host='127.0.0.1', port=port)
-
     app.run(host='127.0.0.1', port=port)

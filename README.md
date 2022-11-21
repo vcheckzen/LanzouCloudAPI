@@ -9,8 +9,8 @@
 ```bash
 git clone --depth 1 https://github.com/vcheckzen/LanzouCloudAPI.git
 cd LanzouCloudAPI
-pip3.6+ install -r requirements.txt
-python3.6+ index.py
+pip3.7+ install -r requirements.txt
+python3.7+ index.py
 ```
 
 ### Request APIs
@@ -51,7 +51,7 @@ Date: Fri, 02 Apr 2021 21:17:25 GMT
 ### Initialize the Service
 
 ```bash
-# install python3.6+ manually before executing the following command
+# install python3.7+ manually before executing the following command
 bash <(curl -sL https://github.com/vcheckzen/LanzouCloudAPI/raw/master/setup.sh)
 
 # uninstall
