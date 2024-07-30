@@ -67,31 +67,34 @@ def get_url(fid: str, client: Client, pwd=None):
     if client == Client.PC:
         text = get(f'{ORIGIN}/{fid}', client).text
         if pwd:
-            old_ver = find_first(r"^[^/]+?data *?: *?'([^']+?)'", text)
+            old_ver = find_first(r"^\s*?[^/]+?data *?: *?'([^']+?)'", text)
             if old_ver:
                 params = old_ver + pwd
             else:
-                try:
-                    for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?= *?'.*?')", text):
+                for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?=.+?);", text):
+                    try:
                         exec(m.group(1))
-                    for m in find_all(r"^[^/]+?data *?: *?({.+?})", text):
+                    except Exception:
+                        pass
+                for m in find_all(r"^\s*?[^/]+?data *?: *?({.+?})", text):
+                    try:
                         data = eval(m.group(1))
                         if len(data.get('sign')) > 10:
                             break
-                except Exception:
-                    pass
+                    except Exception:
+                        pass
                 params = urlencode(data, quote_via=quote_plus)
         else:
             fn = find_first(r'iframe.+?src=\"([^\"]{20,}?)\"', text)
             text = get(f'{ORIGIN}/{fn}',  client).text
 
-            try:
-                for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?= *?'.*?')", text):
+            for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?=.+?);", text):
+                try:
                     exec(m.group(1))
-            except Exception:
-                pass
+                except Exception:
+                    pass
 
-            data = eval(find_first(r"^[^/]+?data *?: *?({.+?})", text))
+            data = eval(find_first(r"^\s*?[^/]+?data *?: *?({.+?})", text))
             params = urlencode(data, quote_via=quote_plus)
 
         fake_url = get_fake_url(params)
@@ -103,17 +106,17 @@ def get_url(fid: str, client: Client, pwd=None):
 
         text = get(f'{ORIGIN}/tp/{fid}', client).text
         if pwd:
-            try:
-                for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?= *?'.*?')", text):
+            for m in find_all(r"^\s*?[^/]+? ([^\d\s][\$\w]+? *?=.+?);", text):
+                try:
                     exec(m.group(1))
-            except Exception:
-                pass
+                except Exception:
+                    pass
 
-            params = eval(find_first(r"^[^/]+? *?data *?: *?({.+?})", text))
+            params = eval(find_first(r"^\s*?[^/]+? *?data *?: *?({.+?})", text))
             fake_url = get_fake_url(params)
         else:
-            url_pre = find_first(r"^[^/]+? *?= *?'(https?://[^']+)'", text)
-            url_suf = find_first(r"^[^/]+?[$\w\s]+? *?= *?'(\?[^']+?)'", text)
+            url_pre = find_first(r"^\s*?[^/]+? *?= *?'(https?://[^']+?)'", text)
+            url_suf = find_first(r"^\s*?[^/]+?[$\w\s]+? *?= *?'(\?[^']+?)'", text)
             fake_url = url_pre + url_suf
 
     return get(fake_url, client).headers['location']
@@ -161,7 +164,7 @@ def gen_json_response(code, msg, extra={}):
 def catch_all(path):
     url = request.args.get('url', '')
     fid = url.split('/')[-1]
-    if not re.match(r"[\w]{4,}.*", fid):
+    if not re.match(r"[\w]{4,}.*?", fid):
         return gen_json_response(
             -1,
             'invalid link',
@@ -230,8 +233,8 @@ def test():
         print('--------------------------------------')
 
     for fid, pwd in {
-        'i5nuK1lijzmh': '9oy8',
-        'iDuWS1iy0s0h': None,
+        'iDuSh22faxqj': '6q1d',
+        'i0gZ322ututi': None,
         'i7tit9c': '6svq',
         'i4wk2oh': None,
         'iRujgdfrkza': None,
