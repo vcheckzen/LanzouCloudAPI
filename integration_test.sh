@@ -11,11 +11,12 @@ test_server="http://localhost:3000"
 
 $server_run_cmd >/dev/null 2>&1 &
 server_pid=$!
-sleep 2
+sleep 1
 if ! kill -0 $server_pid 2>/dev/null; then
     echo "Starting server failed"
     exit 1
 fi
+while ! curl -sm1 $test_server >/dev/null 2>&1; do sleep 1; done
 
 ln_fmt="%10s%10s%20s%15s\n"
 printf "$ln_fmt" RET FUN FID PWD
