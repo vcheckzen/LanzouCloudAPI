@@ -7,7 +7,7 @@ for rq in curl tar grep sed systemctl python3; do
     }
 done
 
-IP=140.249.61.99
+IP=118.31.212.253
 DOMAIN=lanzoui.com
 OLD_DOMAIN=pan.lanzou.com
 REPO=LanzouCloudAPI
@@ -17,7 +17,7 @@ POETRY_INSTALATION_SCRIPT=https://install.python-poetry.org
 install() {
     curl -sSL "$POETRY_INSTALATION_SCRIPT" | python3 -
 
-    cd "$SAVE_PATH"
+    cd "$SAVE_PATH" || exit 1
     rm -f master.tar.gz
     curl -LO "https://github.com/vcheckzen/$REPO/archive/master.tar.gz"
 
@@ -27,7 +27,7 @@ install() {
     tar xf master.tar.gz -C "$REPO" --strip-components 1
     rm -f master.tar.gz
 
-    cd "$REPO"
+    cd "$REPO" || exit 1
     poetry config virtualenvs.in-project true
     poetry install
 
@@ -46,7 +46,7 @@ install() {
 uninstall() {
     curl -sSL "$POETRY_INSTALATION_SCRIPT" | python3 - --uninstall
 
-    rm -rf "$SAVE_PATH/$REPO"
+    rm -rf "${SAVE_PATH:?}/${REPO:?}"
 
     sed -i "/.*$DOMAIN/d" /etc/hosts
 

@@ -5,7 +5,7 @@ if [ "$1" = "" ]; then
     exit 1
 fi
 
-file_map="iDuSh22faxqj:6q1d i0gZ322ututi: i7tit9c:6svq i4wk2oh: iRujgdfrkza: dkbdv7:"
+file_map="iDuSh22faxqj:6q1d i0gZ322ututi: iRujgdfrkza: iCXIww56qpe: dkbdv7:"
 server_run_cmd="$1"
 test_server="http://localhost:3000"
 
